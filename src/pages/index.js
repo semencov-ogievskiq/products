@@ -1,7 +1,8 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
-function Index( props ){
-
+const Index = ( props ) => {
+    console.log( props )
 
   
     return (
@@ -12,4 +13,4 @@ function Index( props ){
 
 }
 
-export default Index;
+export default connect()(Index)
