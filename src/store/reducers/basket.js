@@ -14,8 +14,8 @@ export const basketSlice = createSlice({
       state.list.push(action.payload)
     },
     removeBasket: (state, action) => {
-        let index = state.list.indexOf(action.payload)
-        state.list.splice(index)
+      let index = state.list.indexOf(action.payload)
+      state.list.splice(index,1)
     }
   }
 });
