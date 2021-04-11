@@ -1,36 +1,51 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 import {
-    Modal, Table, Button
+    Modal, Table, Button, Spinner
 } from 'react-bootstrap'
+import { removeBasket, increaseQuantity, lesseningQuantity } from '../store/reducers/basket'
+
 
 class BasketModal extends React.Component{
     constructor( props ){
         super(props)
         this.state = {
-            list: []
+            list: {},
+            totalPrice: 0
         }
     }
 
-    componentDidMount(){
-        console.log(this.props.basket)
+    onShow = async () => {
+        this.setState( { list: {}, totalPrice: 0 } )
         for( let product of this.props.basket ){
-            let list = this.state.list
-            list.push({
-                tt: product,
-                name: 'dss',
-                price: 2312
-            })
-            console.log('hh')
-            this.setState({ list: list })
+            try{
+                let {data} = await axios.get('http://localhost:80/catalog/' + product.id)
+                let list = this.state.list
+                list[data.id] = data
+                this.setState({ list: {... list } })
+            }catch( err ){
+                console.log( err )
+                this.props.dispatch(removeBasket(product.id))
+            }
         }
+    }
+
+    getTotalPrice = () => {
+        let totalPrice = 0
+        for( let product of this.props.basket ){
+            let data = this.state.list[product.id]
+            try{
+                totalPrice += data.price * product.quantity
+            }catch{}
+        }
+        return totalPrice
     }
 
     render(){
-        console.log(this.state.list)
         return (
-            <Modal size="lg" show={this.props.show} onHide={this.props.onHide} animation={false} >
+            <Modal size="lg" show={this.props.show} onHide={this.props.onHide} onShow={this.onShow} animation={false} >
                 <Modal.Header closeButton>
                     <Modal.Title>
                         Корзина
@@ -46,13 +61,30 @@ class BasketModal extends React.Component{
                             </tr>
                         </thead>
                         <thead>
-                            {(this.state.list.length>0)? this.state.list.map( product => (
-                                <tr>
-                                    <td>{product.name}</td>
-                                    <td>{product.price}</td>
-                                    <td></td>
-                                </tr>
-                            ))
+                            {(this.props.basket.length>0)? this.props.basket.map( product => {
+                                let data = this.state.list[product.id]
+                                return(
+                                    <>
+                                    {( data )?(
+                                        <tr>
+                                            <td>{data.name}</td>
+                                            <td>{data.price} $</td>
+                                            <td className="text-right pr-2">
+                                                <Button variant="light" onClick={()=>this.props.dispatch(lesseningQuantity(product.id))}>-</Button>
+                                                <span className="mx-2">{product.quantity}</span>
+                                                <Button variant="light" onClick={()=>this.props.dispatch(increaseQuantity(product.id))}>+</Button>
+                                            </td>
+                                        </tr>   
+                                    ):
+                                    (<tr>
+                                        <th className="text-center" colSpan="3">
+                                            <Spinner animation="border" />
+                                        </th>
+                                    </tr>)
+                                    }
+                                    </>
+                                )
+                            })
                             :
                                 <tr>
                                     <th className="text-center" colSpan="3">В корзине нет товаров</th>
@@ -62,6 +94,7 @@ class BasketModal extends React.Component{
                     </Table>
                 </Modal.Body>
                 <Modal.Footer>
+                    <h5 className="w-100">Итог: {parseFloat(this.getTotalPrice()).toFixed(2)} $</h5>
                     <Button as={Link} variant="success" to="/basket" onClick={this.props.onHide}>Подробнее</Button>
                 </Modal.Footer>
             </Modal>

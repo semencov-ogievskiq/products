@@ -47,7 +47,7 @@ class Catalog extends React.Component{
                                             </Card.Title>
                                             <Card.Text>{el.description}</Card.Text>
                                             <Card.Text className="text-right h4">{el.price}$</Card.Text>
-                                            {(this.props.basket.indexOf(el.id)===-1)?(
+                                            {(this.props.basket.findIndex((e)=>( e.id === el.id )) === -1)?(
                                                 <Button className="float-right" variant="success" onClick={()=>{this.props.dispatch(addBasket(el.id))}}>В корзину</Button>
                                             ):(
                                                 <Button className="float-right" variant="light" onClick={()=>{this.props.dispatch(removeBasket(el.id))}}>Убрать</Button>
