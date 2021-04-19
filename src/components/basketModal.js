@@ -24,7 +24,7 @@ class BasketModal extends React.Component{
                 let {data} = await axios.get('http://localhost:80/catalog/' + product.id)
                 let list = this.state.list
                 list[data.id] = data
-                this.setState({ list: {... list } })
+                this.setState({ list: {...list} })
             }catch( err ){
                 console.log( err )
                 this.props.dispatch(removeBasket(product.id))
@@ -45,7 +45,7 @@ class BasketModal extends React.Component{
 
     render(){
         return (
-            <Modal size="lg" show={this.props.show} onHide={this.props.onHide} onShow={this.onShow} animation={false} >
+            <Modal size="lg" show={this.props.show} onHide={this.props.onHide} onShow={this.onShow} animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>
                         Корзина
@@ -64,7 +64,7 @@ class BasketModal extends React.Component{
                             {(this.props.basket.length>0)? this.props.basket.map( product => {
                                 let data = this.state.list[product.id]
                                 return(
-                                    <>
+                                    <React.Fragment key={ product.id }>
                                     {( data )?(
                                         <tr>
                                             <td>{data.name}</td>
@@ -82,7 +82,7 @@ class BasketModal extends React.Component{
                                         </th>
                                     </tr>)
                                     }
-                                    </>
+                                    </React.Fragment>
                                 )
                             })
                             :

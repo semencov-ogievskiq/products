@@ -37,8 +37,7 @@ class App extends React.Component {
         <Navbar bg="light">
           <Navbar.Brand as={NavLink} to="/">Продукты</Navbar.Brand>
           <Nav className="mr-auto">
-            <Nav.Link as={NavLink} to="/catalog">Home</Nav.Link>
-            <Nav.Link as={NavLink} to="/basket">Link</Nav.Link>
+            <Nav.Link as={NavLink} to="/catalog">Каталог</Nav.Link>
           </Nav>
           <Nav>
             <Nav.Link onClick={this.showBasketModal}>
