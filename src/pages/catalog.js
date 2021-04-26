@@ -3,7 +3,7 @@ import axios from 'axios'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import {
-    Card, Container, Row, Col, Button, Form
+    Card, Container, Row, Col, Button, Form, Spinner
 } from 'react-bootstrap'
 import { addBasket, removeBasket } from '../store/reducers/basket'
 
@@ -16,26 +16,70 @@ const Catalog = props => {
         priceTo: ''
     })
     const [ filter, setFilter ] = useState({})
+    const [ limitIndex, setLimitIndex ] = useState(19)
+    const [ loading, setLoading ] = useState( false )
 
+    // Запрос списка товаров
     useEffect(()=>{
         const source = axios.CancelToken.source()
+        setLoading(true)
+        setList([])
         axios.get('http://localhost:80/catalog', { cancelToken: source.token, params: filter })
             .then((res)=>{
+                setLimitIndex(20)
                 setList(res.data)
+                setLoading(false)
             })
-            .catch((err)=>{ console.log(err) })
+            .catch((err)=>{ 
+                console.log(err) 
+                setLoading(false)
+            })
         return ()=>{ source.cancel('Размантирован') }
     },[filter])
+
+    // что сделать при демонтирование компонента
+    useEffect(()=>{
+        return ()=>{ 
+            window.onscroll = null;
+        }
+    },[]) 
+
+    window.onscroll = ev => {
+        if( window.scrollY === window.scrollMaxY && !loading && limitIndex!=='max'){
+            // Когда страница доходит но низа подгружать еще товары по тем же условиям
+            setLoading(true)
+            axios.get('http://localhost:80/catalog', { params: { ...filter, limitIndex } })
+                .then((res)=>{
+                    if( res.data.length > 0 ){
+                        setList( [ ...list, ...res.data])
+                        if( res.data.length < 20 ){ 
+                            setLimitIndex( 'max' ) 
+                        }else{
+                            setLimitIndex( limitIndex + 20 )
+                        }
+                    }else{
+                        setLimitIndex( 'max' )
+                    }
+                    setLoading(false)
+                })
+                .catch((err)=>{ 
+                    console.log(err)
+                    setLoading(false)
+                })
+        }
+    }
 
     const submit = ev => {
         ev.preventDefault()
         setFilter(filterForm)
     }
 
+    
+
     return (
         <Row>
             <Col md={{span:4,order:12}} lg={{span:3,order:12}} xl={{span:3,order:12}}>
-                <Form onSubmit={submit}>
+                <Form className="mb-4" onSubmit={submit}>
                     <Form.Group className="text-center" controlId="type">
                         <Form.Label>Тип продукта</Form.Label>
                         <Form.Control as="select" value={filterForm.type} onChange={ ev => setFilterForm({...filterForm, type: ev.target.value }) }>
@@ -62,10 +106,14 @@ const Catalog = props => {
             </Col>
             <Col md={{span:8,order:1}} lg={{span:9,order:1}} xl={{span:9,order:1}}>
                 <Container fluid>
-                    <Row>
-                        {list.map((el)=>(
+                    <Row className="mb-4">
+                        {( !list.length && !loading)?
+                            <Col className="text-center" xs={12}>
+                                <h4>По вашему запросу ничего не найдено</h4>
+                            </Col>
+                        :list.map((el)=>(
                             <Col key={el.id}>
-                                <Card>
+                                <Card className="my-2">
                                     <Card.Body>
                                         <Card.Title>
                                             <Link to={ '/product/' + el.id }>{el.name}</Link>
@@ -81,6 +129,11 @@ const Catalog = props => {
                                 </Card>
                             </Col>
                         ))}
+                        {(loading)?
+                            <Col className="text-center my-2" xs={12}>
+                                <Spinner animation="border"/>
+                            </Col>
+                        : null }
                     </Row>
                 </Container>
             </Col>

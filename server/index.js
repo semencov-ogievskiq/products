@@ -20,7 +20,21 @@ app.use('/', ident.router)
 
 app.get('/catalog', async (req, res) => {
     try{
-        let [catalog] = await db.query("SELECT * FROM products")
+        let where = []
+        if( req.query.type ) where.push('type=' +mysql.escape(req.query.type))
+        if( req.query.name ) where.push(`name LIKE "%${req.query.name}%"`)
+        if( req.query.priceFrom && req.query.priceTo ) {
+            where.push('price BETWEEN ' + mysql.escape(req.query.priceFrom) + ' and ' + mysql.escape(req.query.priceTo))
+        }else{
+            if( req.query.priceFrom ) where.push('price>=' +mysql.escape(req.query.priceFrom))
+            if( req.query.priceTo ) where.push('price<=' +mysql.escape(req.query.priceTo))
+        }
+        
+        where = ( where.length > 0 )? ' WHERE ' + where.join(' and ') : ''
+        let limit = ( req.query.limitIndex )? req.query.limitIndex : 0
+
+        let [catalog] = await db.query(`SELECT * FROM products ${where} LIMIT ${limit},20`)
+
 
         for( var i in catalog){
             catalog[i].id = catalog[i].id.toString()

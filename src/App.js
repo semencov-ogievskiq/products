@@ -33,7 +33,7 @@ const App = ( props ) => {
         <Nav>
           {(!props.client.token)?<Nav.Link onClick={()=>{ setShowLM(!showLM) }}>Авторизация</Nav.Link>:(
             <NavDropdown title={props.client.client.mail}>
-              <NavDropdown.Item>Профиль</NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/user">Профиль</NavDropdown.Item>
               <NavDropdown.Item>Заказы в ожидании</NavDropdown.Item>
               <NavDropdown.Item>История заказов</NavDropdown.Item>
               <NavDropdown.Item>Избранное</NavDropdown.Item>

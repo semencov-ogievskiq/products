@@ -23,7 +23,7 @@ async function identification(jwt_payload){
         return false
     }else{
         // если в токене есть id сессии запрашиваем ее и проверяем токен
-        let [ [ client ] ] = await db.query("SELECT * FROM users WHERE id=?",[jwt_payload.aud])
+        let [ [ client ] ] = await db.query("SELECT id,mail,f,i,o,DATE_FORMAT(dt_birth,'%d.%m.%Y') dt_birth FROM users WHERE id=?",[jwt_payload.aud])
         if( client ){
             return {...client}
         }else{
@@ -75,7 +75,6 @@ const createToken = function(_audience){
 
 router.post('/login', async function(req, res){
     let hash_password = crypto.SHA512(req.body.password)
-    console.log(hash_password.toString())
     var [row] = await db.query("SELECT id FROM users WHERE mail=? and hash_password=?",[req.body.mail,hash_password.toString()])
     if(!row.length){
         res.status(400).json({
