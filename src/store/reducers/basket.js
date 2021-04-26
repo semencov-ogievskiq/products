@@ -11,11 +11,11 @@ const setLocalStorage = list => {
 }
 
 export const basketSlice = createSlice({
-  name: 'catalog',
+  name: 'basket',
   initialState,
   reducers: {
     addBasket: (state, action) => {
-      state.list.push({ id: action.payload, quantity: 1})
+      state.list.push({ id: action.payload.toString(), quantity: 1})
       setLocalStorage(state.list)
     },
     removeBasket: (state, action) => {

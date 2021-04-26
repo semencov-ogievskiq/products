@@ -2,6 +2,7 @@ const express = require('express')
 const mysql = require('mysql2/promise')
 const app = express()
 const cors = require('cors')
+const ident = require('./identification')
 
 global.db = mysql.createPool({
     connectionLimit: 10,
@@ -14,10 +15,16 @@ global.db = mysql.createPool({
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+app.use(ident.passport.initialize())
+app.use('/', ident.router) 
 
 app.get('/catalog', async (req, res) => {
     try{
         let [catalog] = await db.query("SELECT * FROM products")
+
+        for( var i in catalog){
+            catalog[i].id = catalog[i].id.toString()
+        }
         
         res.status(200).json(catalog)
     }catch( err ){
@@ -30,6 +37,7 @@ app.get('/catalog/:id', async (req, res) => {
     try{
         let [catalog] = await db.query("SELECT * FROM products WHERE id=?",[req.params.id])
         catalog = catalog[0]
+        catalog.id = catalog.id.toString()
         catalog.characteristic = JSON.parse((catalog.characteristic)?catalog.characteristic:null)
         res.status(200).json(catalog)
     }catch( err ){
@@ -57,6 +65,7 @@ app.post('/orders', async (req,res) => {
         res.status(400).json(err)
     }
 })
+
 
 app.listen(80, ()=>{
     console.log('Сервер запущен')

@@ -1,14 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-class Index extends React.Component{
-    render(){
-        return (
-            <>
-
-            </>
-        )
-    }
+const Index = props => {
+    return (
+        <>
+            <h1>dfdfd</h1>
+        </>
+    )
 }
 
 export default connect()(Index)

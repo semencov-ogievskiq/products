@@ -1,65 +1,67 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, Switch, Route } from 'react-router-dom'
 import { connect } from 'react-redux'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {
-  Navbar, Container, Nav, Badge 
+  Navbar, Container, Nav, Badge, NavDropdown 
 } from 'react-bootstrap'
-import Index from './pages/index'
-import Catalog from './pages/catalog'
-import Product from './pages/product'
-import Basket from './pages/basket'
 import BasketModal from './components/basketModal'
+import LoginModal from './components/loginModal'
+import axios from 'axios'
+import { logout } from './store/reducers/client'
+import config from './config'
 
-class App extends React.Component {
-  constructor(props){
-    super(props)
-    this.routers = [
-      { path: '/', component: Index },
-      { path: '/catalog', component: Catalog },
-      { path: '/product/:id', component: Product },
-      { path: '/basket', component: Basket },
-    ]
-    this.state = {
-      basketModal: {
-        show: false
-      }
-    }
+
+const App = ( props ) => {
+  const [ showBM, setShowBM ] = useState(false)
+  const [ showLM, setShowLM ] = useState(false)
+
+  axios.defaults.baseURL = 'http:localhost:80'
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + props.client.token
+
+  const onLogout = () => {
+    props.dispatch(logout())
   }
 
-  showBasketModal = () =>{
-    this.setState({basketModal:{show: !this.state.basketModal.show}})
-  }
-
-  render(){
-    return (
-      <React.Fragment>
-        <Navbar bg="light">
-          <Navbar.Brand as={NavLink} to="/">Продукты</Navbar.Brand>
-          <Nav className="mr-auto">
-            <Nav.Link as={NavLink} to="/catalog">Каталог</Nav.Link>
-          </Nav>
-          <Nav>
-            <Nav.Link onClick={this.showBasketModal}>
-              Корзина
-              {(this.props.basket.length>0)?<Badge className="ml-1" variant="success">{this.props.basket.length}</Badge>:''}
-            </Nav.Link>
-          </Nav>
-        </Navbar>
-        <Container className='my-4'>
-          <Switch>
-            {this.routers.map( ( route, i ) => (
-              <Route key={i} exact path={route.path} render={(props) => ( <route.component {...props} />)}/>
-            ))}
-          </Switch>
-        </Container>
-        <BasketModal show={this.state.basketModal.show} onHide={this.showBasketModal}/>
-      </React.Fragment>
-    );
-  }
+  return (
+    <>
+      <Navbar bg="light">
+        <Navbar.Brand as={NavLink} to="/">Продукты</Navbar.Brand>
+        <Nav className="mr-auto">
+          <Nav.Link as={NavLink} to="/catalog">Каталог</Nav.Link>
+        </Nav>
+        <Nav>
+          {(!props.client.token)?<Nav.Link onClick={()=>{ setShowLM(!showLM) }}>Авторизация</Nav.Link>:(
+            <NavDropdown title={props.client.client.mail}>
+              <NavDropdown.Item>Профиль</NavDropdown.Item>
+              <NavDropdown.Item>Заказы в ожидании</NavDropdown.Item>
+              <NavDropdown.Item>История заказов</NavDropdown.Item>
+              <NavDropdown.Item>Избранное</NavDropdown.Item>
+              <NavDropdown.Item onClick={onLogout}>Выход</NavDropdown.Item>
+            </NavDropdown>
+          )}
+          
+          <Nav.Link onClick={()=>{ setShowBM(!showBM) }}>
+            Корзина
+            {(props.basket.length>0)?<Badge className="ml-1" variant="success">{props.basket.length}</Badge>:''}
+          </Nav.Link>
+        </Nav>
+      </Navbar>
+      <Container className='my-4'>
+        <Switch>
+          {config.routers.map( ( route, i ) => (
+            <Route key={i} exact path={route.path} render={(props) => ( <route.component {...props} />)}/>
+          ))}
+        </Switch>
+      </Container>
+      <BasketModal show={showBM} onHide={()=>{ setShowBM(!showBM) }}/>
+      <LoginModal show={showLM} onHide={()=>{ setShowLM(!showLM) }}/>
+    </>
+  )
 }
 
-const mapStateToProps = ( state ) => ({ 
+const mapStateToProps = ( state ) => ({
+  client: state.client,
   basket: state.basket.list
 })
 

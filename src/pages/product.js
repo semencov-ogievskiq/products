@@ -62,7 +62,7 @@ class Product extends React.Component{
                                     {(this.props.basket.findIndex((e)=>( e.id === this.id )) === -1)?(
                                         <Button className="float-right" variant="success" onClick={()=>{this.props.dispatch(addBasket(this.id))}}>В корзину</Button>
                                     ):(
-                                        <Button className="float-right" variant="light" onClick={()=>{this.props.dispatch(removeBasket(this.id))}}>Убрать</Button>
+                                        <Button className="float-right" variant="light" onClick={()=>{this.props.dispatch(removeBasket(+this.id))}}>Убрать</Button>
                                     )}
                                 </div>
                             </Col>
