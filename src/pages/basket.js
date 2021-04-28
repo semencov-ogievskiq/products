@@ -5,10 +5,12 @@ import axios from 'axios'
 import {
     Table, Button, Spinner, Form
 } from 'react-bootstrap'
-import { removeBasket, increaseQuantity, lesseningQuantity } from '../store/reducers/basket'
+import { removeBasket, increaseQuantity, lesseningQuantity, removeBasketAll } from '../store/reducers/basket'
+import { push } from 'connected-react-router'
 
 const TableBasket = props => {
     const [ list, setList ] = useState({})
+    const disabled = props.disabled
 
     useEffect( ()=>{
         let cancel = false
@@ -59,9 +61,9 @@ const TableBasket = props => {
                                 <td><Link to={ '/product/' + data.id }>{data.name}</Link></td>
                                 <td>{data.price} $</td>
                                 <td className="text-right pr-2">
-                                    <Button variant="light" onClick={()=>props.dispatch(lesseningQuantity(product.id))}>-</Button>
+                                    <Button variant="light" onClick={()=>props.dispatch(lesseningQuantity(product.id))} disabled={disabled}>-</Button>
                                     <span className="mx-2">{product.quantity}</span>
-                                    <Button variant="light" onClick={()=>props.dispatch(increaseQuantity(product.id))}>+</Button>
+                                    <Button variant="light" onClick={()=>props.dispatch(increaseQuantity(product.id))} disabled={disabled}>+</Button>
                                 </td>
                             </tr>    
                         ):
@@ -89,17 +91,31 @@ const TableBasket = props => {
 
 const Basket = props => {
     const [ form, setForm ] = useState({
-        method: '',
-        address: '',
+        method: '1',
+        address: (props.client.address)?props.client.address:'',
         comment: '',
         pic_point: '',
-        fio: '',
+        fio: (props.client.f)? `${props.client.f} ${props.client.i} ${props.client.o}`:'',
         payment_type: '',
-        phone: ''
+        phone: (props.client.phone)?props.client.phone:''
     })
+    const [ loading, setLoading] = useState(false)
+    console.log(props.client)
 
     const submitForm = ev => {
         ev.preventDefault()
+        setLoading(true)
+        axios.put('http://localhost:80/orders',{...form, products: props.basket})
+            .then((data)=>{
+                console.log('true')
+                props.dispatch(removeBasketAll())
+                props.dispatch(push('/'))
+                setLoading(false)
+            })
+            .catch((err)=>{
+                console.log(err)
+                setLoading(false)
+            })
     }
 
     const onChangeMethod = ev => {
@@ -109,12 +125,12 @@ const Basket = props => {
     return (
         <>
             <h1>Корзина</h1>
-            <TableBasket basket={props.basket} dispatch={props.dispatch}/>
+            <TableBasket basket={props.basket} dispatch={props.dispatch} disabled={loading}/>
             {(props.basket.length>0)?(
                 <Form onSubmit={submitForm}>
                     <Form.Group controlId="method">
                         <Form.Label>Способ доставки</Form.Label>
-                        <Form.Control as="select" name="method" value={form.method} required onChange={onChangeMethod}>
+                        <Form.Control as="select" name="method" value={form.method} required onChange={onChangeMethod} disabled={loading} required>
                             <option></option>
                             <option value="1">Курьер</option>
                             <option value="2">Самовывоз</option>
@@ -123,17 +139,17 @@ const Basket = props => {
                     {(form.method==='1')?(<>
                         <Form.Group controlId="address">
                             <Form.Label>Адрес доставки</Form.Label>
-                            <Form.Control type="text" name="address" value={form.address} onChange={(e)=>{ setForm({...form, address: e.target.value }) }}/>
+                            <Form.Control type="text" name="address" value={form.address} onChange={(e)=>{ setForm({...form, address: e.target.value }) }} disabled={loading} required/>
                         </Form.Group>
                         <Form.Group controlId="comment">
                             <Form.Label>Комментарий к доставке</Form.Label>
-                            <Form.Control as="textarea" name="comment" value={form.comment} onChange={(e)=>{ setForm({ ...form, comment: e.target.value }) }}/>
+                            <Form.Control as="textarea" name="comment" value={form.comment} onChange={(e)=>{ setForm({ ...form, comment: e.target.value }) }} disabled={loading} required/>
                         </Form.Group>
                     </>):null}
                     {(form.method==='2')?(<>
                         <Form.Group controlId="pic_point">
                             <Form.Label>Пункт выдачи</Form.Label>
-                            <Form.Control as="select" name="pic_point" value={form.pic_point} onChange={(e)=>{ setForm({ ...form, pic_point: e.target.value }) }}>
+                            <Form.Control as="select" name="pic_point" value={form.pic_point} onChange={(e)=>{ setForm({ ...form, pic_point: e.target.value }) }} disabled={loading} required>
                                 <option></option>
                                 <option value="1">Савеловский</option>
                                 <option value="2">Белоруский</option>
@@ -142,21 +158,21 @@ const Basket = props => {
                     </>):null}
                     <Form.Group controlId="fio">
                         <Form.Label>ФИО заказчика</Form.Label>
-                        <Form.Control type="text" name="fio" value={form.fio} onChange={(e)=>{ setForm({ ...form, fio: e.target.value }) }}/>
+                        <Form.Control type="text" name="fio" value={form.fio} onChange={(e)=>{ setForm({ ...form, fio: e.target.value }) }} disabled={loading} required/>
                     </Form.Group>
                     <Form.Group controlId="phone">
                         <Form.Label>Телефон</Form.Label>
-                        <Form.Control type="text" name="phone" value={form.phone} onChange={(e)=>{ setForm({ ...form, phone: e.target.value }) }}/>
+                        <Form.Control type="text" name="phone" value={form.phone} onChange={(e)=>{ setForm({ ...form, phone: e.target.value }) }} disabled={loading} required/>
                     </Form.Group>
                     <Form.Group controlId="payment_type">
                         <Form.Label>Способ оплаты</Form.Label>
-                        <Form.Control as="select" name="payment_type" value={form.payment_type} onChange={(e)=>{ setForm({ ...form, payment_type: e.target.value }) }}>
+                        <Form.Control as="select" name="payment_type" value={form.payment_type} onChange={(e)=>{ setForm({ ...form, payment_type: e.target.value }) }} disabled={loading} required>
                             <option></option>
                             <option value="1">Картой</option>
                             <option value="2">Наличными</option>
                         </Form.Control>
                     </Form.Group>
-                    <Button type="submit" className="float-right my-3" variant="primary">Заказать</Button>
+                    <Button type="submit" className="float-right my-3" variant="primary" disabled={loading}>Заказать</Button>
                 </Form>
             ):null}
         </>
@@ -164,7 +180,8 @@ const Basket = props => {
 }
 
 const mapStateToProps = ( state ) => ({ 
-    basket: state.basket.list
+    basket: state.basket.list,
+    client: state.client.client
 })
 
 export default connect(mapStateToProps)(Basket);

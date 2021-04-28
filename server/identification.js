@@ -23,7 +23,7 @@ async function identification(jwt_payload){
         return false
     }else{
         // если в токене есть id сессии запрашиваем ее и проверяем токен
-        let [ [ client ] ] = await db.query("SELECT id,mail,f,i,o,DATE_FORMAT(dt_birth,'%d.%m.%Y') dt_birth FROM users WHERE id=?",[jwt_payload.aud])
+        let [ [ client ] ] = await db.query("SELECT id,mail,f,i,o,DATE_FORMAT(dt_birth,'%d.%m.%Y') dt_birth, phone, address FROM users WHERE id=?",[jwt_payload.aud])
         if( client ){
             return {...client}
         }else{

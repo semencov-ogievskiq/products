@@ -60,7 +60,7 @@ app.get('/catalog/:id', async (req, res) => {
     }
 })
 
-app.post('/orders', async (req,res) => {
+app.put('/orders', async (req,res) => {
     try{
         let data = req.body
         data.products = JSON.stringify(data.products)
@@ -73,6 +73,31 @@ app.post('/orders', async (req,res) => {
         
         let [ result] = await db.query("INSERT INTO orders SET ?",[req.body])
         if( !result.insertId ) throw new Error('Не удалось зарегистрировать заказ')
+        res.status(200).end()
+    }catch( err ){
+        console.log(err)
+        res.status(400).json(err)
+    }
+})
+
+app.post('/users/:id', async (req,res) => {
+    try{
+        let id = req.params.id
+        let [ client ] = await db.query(`SELECT * from users WHERE id=${id}`)
+        if( !client[0]) throw new Error('Пользователь не найден')
+        let data = req.body
+        let sets = []
+        let prepare = []
+        Object.keys(data).map((key)=>{
+            if( data[key] == '' ){
+                data[key] = null
+            }
+            sets.push((key!=='dt_birth')? key + '=?' : key + '=STR_TO_DATE(?,"%d.%m.%Y")')
+            prepare.push(data[key])
+        })
+        
+        let [ result] = await db.query(`UPDATE users SET ${sets.join(', ')} WHERE id=${id}`,prepare)
+        if( !result.changedRows ) throw new Error('Не удалось обновить данные')
         res.status(200).end()
     }catch( err ){
         console.log(err)

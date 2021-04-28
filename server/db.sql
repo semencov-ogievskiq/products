@@ -31,14 +31,17 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `products` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 
--- Дамп данных таблицы products.orders: ~2 rows (приблизительно)
+-- Дамп данных таблицы products.orders: ~5 rows (приблизительно)
 DELETE FROM `orders`;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
 INSERT INTO `orders` (`id`, `address`, `comment`, `fio`, `method`, `payment_type`, `phone`, `pic_point`, `products`) VALUES
 	(1, '42343', '42343', '4234', 1, 1, '34234324', NULL, '[{"id":1,"quantity":1},{"id":2,"quantity":1}]'),
-	(2, 'rwer', 'erwer', 'erwer', 1, 1, 'rewrwer', NULL, '[{"id":2,"quantity":22},{"id":1,"quantity":1}]');
+	(2, 'rwer', 'erwer', 'erwer', 1, 1, 'rewrwer', NULL, '[{"id":2,"quantity":22},{"id":1,"quantity":1}]'),
+	(3, 'г. Москва ул тверская', 'hgfh', 'Семенцов-Огиевский Алексей Михайлович', 1, 1, '89998493923', NULL, '[{"id":"10","quantity":9},{"id":"9","quantity":2}]'),
+	(4, 'г. Москва ул тверская', 'hgfh', 'Семенцов-Огиевский Алексей Михайлович', 1, 1, '89998493923', NULL, '[{"id":"10","quantity":9},{"id":"9","quantity":2}]'),
+	(5, 'г. Москва ул тверская', 'efe', 'Семенцов-Огиевский Алексей Михайлович', 1, 1, '89998493923', NULL, '[{"id":"5","quantity":4},{"id":"4","quantity":1}]');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 
 -- Дамп структуры для таблица products.products
@@ -124,6 +127,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `i` varchar(50) NOT NULL,
   `o` varchar(50) DEFAULT NULL,
   `dt_birth` date DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   UNIQUE KEY `mail` (`mail`)
@@ -132,8 +137,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Дамп данных таблицы products.users: ~1 rows (приблизительно)
 DELETE FROM `users`;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (`id`, `mail`, `hash_password`, `f`, `i`, `o`, `dt_birth`) VALUES
-	(1, 'myblackguitar@mail.ru', '82f3d24ce9179f03b15eaf2363adb8abd738ebd325d21ff6cbf6d596526585820dd1d8467ae2684f15465d2599a808bf3ae8e7d0e496d55d0549b593e185dda4', 'Семенцов-Огиевский', 'Алексей', 'Михайлович', '1996-06-09');
+INSERT INTO `users` (`id`, `mail`, `hash_password`, `f`, `i`, `o`, `dt_birth`, `phone`, `address`) VALUES
+	(1, 'myblackguitar@mail.ru', '82f3d24ce9179f03b15eaf2363adb8abd738ebd325d21ff6cbf6d596526585820dd1d8467ae2684f15465d2599a808bf3ae8e7d0e496d55d0549b593e185dda4', 'Семенцов-Огиевский', 'Алексей', 'Михайлович', '1996-06-09', '89998493923', 'г. Москва ул тверская 4');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
